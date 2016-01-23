@@ -1,0 +1,9 @@
+# Temporary files
+*#
+*~
+*.pyc
+
+# Generated files
+*.c
+*.o
+brightness
