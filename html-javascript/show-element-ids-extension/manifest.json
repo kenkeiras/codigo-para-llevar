@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "show-element-ids",
+    "version": "0.0.1",
+
+    "description": "Make the ID of elements in the page clickable.",
+
+    "icons": {
+        "48": "icons/icon-48.png"
+    },
+
+    "permissions": [
+        "activeTab"
+    ],
+    
+    "browser_action": {
+        "default_icon": {
+            "48": "icons/icon-48.png"
+        },
+        "default_title": "show-element-ids",
+        "default_popup": "popup/show-element-ids.html"
+    }
+}

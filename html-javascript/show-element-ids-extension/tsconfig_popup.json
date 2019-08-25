@@ -1,0 +1,20 @@
+{
+  "compileOnSave": false,
+  "files": [
+    "./src/show-element-ids.ts"
+  ],
+  "compilerOptions": {
+    "outFile": "./popup/show-element-ids.js",
+    "sourceMap": true,
+    "module": "amd",
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "es2016",
+      "dom"
+    ]
+  }
+}
+
