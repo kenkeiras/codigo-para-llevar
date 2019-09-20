@@ -1,8 +1,13 @@
 digraph {
+    node[shape=rect];
+    graph[pad="0", nodesep="0.2", ranksep="0"];
+    edge[color="darkgreen"];
+
     /********** NODES **********/
     // Outer objects
     subgraph cluster_no_resources {
         label="Not resources";
+        color="grey";
 
         container[label="Container", URL="https://www.docker.com/resources/what-container"];
         k8s_node[label="Node", URL="https://kubernetes.io/docs/concepts/architecture/nodes/"];
@@ -13,6 +18,7 @@ digraph {
     // Base
     subgraph cluster_workload {
         label="Workload";
+        color="grey";
 
         pod[label="Pod", URL="https://kubernetes.io/docs/concepts/workloads/pods/pod/"];
     }
@@ -20,6 +26,7 @@ digraph {
     // Controllers
     subgraph cluster_controllers {
         label="Controllers";
+        color="grey";
 
         deployment[label="Deployment", URL="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"];
         replicaset[label="ReplicaSet", URL="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/"];
@@ -31,6 +38,7 @@ digraph {
     // Jobs
     subgraph cluster_jobs {
         label="Jobs";
+        color="grey";
 
         job[label="Job", URL="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/"];
         cronjob[label="CronJob", URL="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/"];
@@ -39,6 +47,7 @@ digraph {
     // Services, load balancing & networking
     subgraph cluster_services {
         label="Services, load balancing & networking";
+        color="grey";
 
         endpoint_slice[label="EndpointSlice", URL="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/", style="dashed"];
         service[label="Service", URL="https://kubernetes.io/docs/concepts/services-networking/service/"];
@@ -50,10 +59,11 @@ digraph {
     // Storage
     subgraph cluster_storage {
         label="Storage";
+        color="grey";
 
         volume[label="Volume", URL="https://kubernetes.io/docs/concepts/storage/volumes/"];
         persistent_volume[label="Persistent Volume", URL="https://kubernetes.io/docs/concepts/storage/persistent-volumes/"];
-        persistent_volume_claim[label="Volume", URL="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims"];
+        persistent_volume_claim[label="PersistentVolumeClaim", URL="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims"];
         volume_snapshot[label="Volume Snapshot", URL="https://kubernetes.io/docs/concepts/storage/volume-snapshots/"];
         storage_class[label="Storage Class", URL="https://kubernetes.io/docs/concepts/storage/storage-classes/"];
         volume_snapshot_class[label="Volume Snapshot Class", URL="https://kubernetes.io/docs/concepts/storage/volume-snapshot-classes/"];
@@ -63,6 +73,7 @@ digraph {
     // Configuration
     subgraph cluster_configuration {
         label="Configuration";
+        color="grey";
 
         secret[label="Secret", URL="https://kubernetes.io/docs/concepts/configuration/secret/"];
     }
