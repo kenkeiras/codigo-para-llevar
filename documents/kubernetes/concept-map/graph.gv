@@ -1,0 +1,98 @@
+digraph {
+    /********** NODES **********/
+    // Outer objects
+    subgraph cluster_no_resources {
+        label="Not resources";
+
+        container[label="Container", URL="https://www.docker.com/resources/what-container"];
+        k8s_node[label="Node", URL="https://kubernetes.io/docs/concepts/architecture/nodes/"];
+        image[label="Image", URL="https://kubernetes.io/docs/concepts/containers/images/"];
+        kubeconfig[label="Kubeconfig", URL="https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/"]
+    }
+
+    // Base
+    subgraph cluster_workload {
+        label="Workload";
+
+        pod[label="Pod", URL="https://kubernetes.io/docs/concepts/workloads/pods/pod/"];
+    }
+
+    // Controllers
+    subgraph cluster_controllers {
+        label="Controllers";
+
+        deployment[label="Deployment", URL="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/"];
+        replicaset[label="ReplicaSet", URL="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/"];
+        replication_controller[label="ReplicationController", URL="https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/"];
+        statefulset[label="StatefulSet", URL="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/"];
+        daemonset[label="DaemonSet", URL="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/"];
+    }
+
+    // Jobs
+    subgraph cluster_jobs {
+        label="Jobs";
+
+        job[label="Job", URL="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/"];
+        cronjob[label="CronJob", URL="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/"];
+    }
+
+    // Services, load balancing & networking
+    subgraph cluster_services {
+        label="Services, load balancing & networking";
+
+        endpoint_slice[label="EndpointSlice", URL="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/", style="dashed"];
+        service[label="Service", URL="https://kubernetes.io/docs/concepts/services-networking/service/"];
+        ingress[label="Ingress", URL="https://kubernetes.io/docs/concepts/services-networking/ingress/"];
+        ingress_controller[label="Ingress Controller", URL="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/"];
+        network_policy[label="Network Policy", URL="https://kubernetes.io/docs/concepts/services-networking/network-policies/"];
+    }
+
+    // Storage
+    subgraph cluster_storage {
+        label="Storage";
+
+        volume[label="Volume", URL="https://kubernetes.io/docs/concepts/storage/volumes/"];
+        persistent_volume[label="Persistent Volume", URL="https://kubernetes.io/docs/concepts/storage/persistent-volumes/"];
+        persistent_volume_claim[label="Volume", URL="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims"];
+        volume_snapshot[label="Volume Snapshot", URL="https://kubernetes.io/docs/concepts/storage/volume-snapshots/"];
+        storage_class[label="Storage Class", URL="https://kubernetes.io/docs/concepts/storage/storage-classes/"];
+        volume_snapshot_class[label="Volume Snapshot Class", URL="https://kubernetes.io/docs/concepts/storage/volume-snapshot-classes/"];
+        configmap[label="ConfigMap", URL="https://kubernetes.io/docs/concepts/storage/volumes/#configmap"];
+    }
+
+    // Configuration
+    subgraph cluster_configuration {
+        label="Configuration";
+
+        secret[label="Secret", URL="https://kubernetes.io/docs/concepts/configuration/secret/"];
+    }
+
+    /********** LINKS **********/
+    // Controllers
+    container -> image[label="Initialized with"];
+    pod -> container[label="Hosts several, sharing filesystem & network"];
+    deployment -> replicaset[label="Deploys version as"];
+    replicaset -> pod[label="Handles restart & replication of"];
+    statefulset -> pod[label="Deploys with \"sticky\" identity"];
+    daemonset -> pod[label="Deploys one per node"];
+
+    replication_controller -> deployment[label="Recommended to replace with", style="dotted"];
+
+    // Jobs
+    cronjob -> job[label="Launches on a schedule"];
+    job -> pod[label="Is run as a"];
+
+    // Services, load balancing & networking
+    ingress_controller -> pod[label="Run by"];
+    ingress_controller -> ingress[label="Routes based on"];
+
+    ingress -> service[label="Routes external requests to"];
+    service -> pod[label="Routes (based on labels) to"];
+
+    // Storage
+    pod -> persistent_volume[label="Stores data on"];
+    pod -> secret[label="Initializes sensitive variables from"];
+    pod -> secret[label="Stores sensitive data on"];
+    pod -> configmap[label="Stores configuration data on"];
+
+}
